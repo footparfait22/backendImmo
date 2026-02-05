@@ -1,0 +1,42 @@
+### 1. Login (Standard)
+# Ce endpoint utilise maintenant votre serializer personnalisé "MyTokenObtainPairSerializer".
+# Il devrait retourner "access", "refresh" ET "user_data" (token decodé).
+POST http://127.0.0.1:8000/api/token/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "your_password"
+}
+
+### 2. Refresh Token
+POST http://127.0.0.1:8000/api/token/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "your_refresh_token_here"
+}
+
+### 3. Properties List
+GET http://127.0.0.1:8000/api/properties/
+Content-Type: application/json
+Authorization: Bearer your_access_token_here
+
+### 4. Register (NEW)
+# Ce endpoint permet de créer un compte.
+POST http://127.0.0.1:8000/api/users/register/
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "email": "user@example.com",
+  "password": "securepassword123",
+  "first_name": "New",
+  "last_name": "User",
+  "role": "client"
+}
+
+### 5. Get User Profile (NEW)
+# Récupère les infos de l'utilisateur connecté via le token.
+GET http://127.0.0.1:8000/api/users/me/
+Authorization: Bearer your_access_token_here
