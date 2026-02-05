@@ -171,6 +171,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # 3. Configuration de la couche Redis (Channel Layer)
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
 
