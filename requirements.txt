@@ -17,3 +17,5 @@ sqlparse==0.5.3
 whitenoise==6.9.0
 pyjwt==2.10.1
 cryptography==46.0.3
+cloudinary==1.42.2
+django-cloudinary-storage==0.3.0
