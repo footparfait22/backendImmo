@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from properties.views import PropertyViewSet
-from users.views import MyTokenObtainPairView, RegisterView, UserDetailView
+from users.views import MyTokenObtainPairView, RegisterView, UserDetailView, GoogleLoginView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/users/register/', RegisterView.as_view(), name='auth_register'),
     path('api/users/me/', UserDetailView.as_view(), name='auth_me'),
+    path('api/token/google/', GoogleLoginView.as_view(), name='google_login'),
 ]
 
 if settings.DEBUG:
