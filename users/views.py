@@ -6,14 +6,27 @@ from .serializers import RegisterSerializer, UserSerializer, MyTokenObtainPairSe
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 class MyTokenObtainPairView(TokenObtainPairView):
+    """
+    Vue de connexion classique (Username + Mot de passe).
+    Renvoie une paire de tokens (Access + Refresh).
+    """
     serializer_class = MyTokenObtainPairSerializer
 
 class RegisterView(generics.CreateAPIView):
+    """
+    Vue d'inscription.
+    Accessible à tous (AllowAny). Utilise le RegisterSerializer pour créer l'utilisateur.
+    """
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
+    """
+    Vue pour voir et modifier son PROPRE profil.
+    Nécessite d'être authentifié.
+    get_object renvoie request.user, assurant qu'on ne modifie que son propre compte.
+    """
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -26,6 +39,13 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class GoogleLoginView(APIView):
+    """
+    Vue pour l'authentification Google (Social Login).
+    Reçoit un 'token' (id_token) depuis le frontend.
+    1. Vérifie le token auprès de Google.
+    2. Récupère ou crée l'utilisateur basé sur l'email.
+    3. Génère manuellement les tokens JWT (Access + Refresh) et les renvoie.
+    """
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):

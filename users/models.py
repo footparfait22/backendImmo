@@ -4,6 +4,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class Profile(models.Model):
+    """
+    Extension du modèle User standard de Django.
+    Permet de stocker des informations supplémentaires comme le rôle (Client/Agent), 
+    le numéro de téléphone et l'avatar.
+    Lie chaque utilisateur à un profil unique (OneToOne).
+    """
     ROLE_CHOICES = (
         ('client', 'Client'),
         ('agent', 'Agent'),
@@ -16,7 +22,9 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
-# Signal pour créer automatiquement un profil à la création d'un User
+# Signal : Automatisation
+# À chaque fois qu'un User est créé (post_save), cette fonction est déclenchée 
+# pour créer automatiquement le Profile associé vide.
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

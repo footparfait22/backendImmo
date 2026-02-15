@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Sérialiseur pour l'affichage et la mise à jour des utilisateurs.
+    Inclut les champs du Profil (rôle, avatar) en lecture seule ou via une logique d'update personnalisée.
+    """
     role = serializers.CharField(source='profile.role', read_only=True)
     avatar = serializers.ImageField(source='profile.avatar', required=False)
 
@@ -21,6 +25,11 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Sérialiseur pour l'inscription d'un nouvel utilisateur.
+    Gère la validation du mot de passe et la création du User.
+    Accept un champ 'role' supplémentaire pour définir le type de profil.
+    """
     password = serializers.CharField(write_only=True)
     role = serializers.ChoiceField(choices=Profile.ROLE_CHOICES, default='client')
 
@@ -45,6 +54,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Personnalisation du Token JWT.
+    Ajoute des informations utiles (username, rôle) directement dans le payload du token.
+    Cela évite au frontend de devoir faire une requête supplémentaire juste pour connaître le rôle.
+    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)

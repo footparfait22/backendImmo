@@ -18,17 +18,20 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file
+# Charger les variables d'environnement depuis le fichier .env
+# C'est une bonne pratique pour ne pas stocker de secrets (clés API, mots de passe) dans le code source.
 env_path = BASE_DIR / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# ATTENTION : La clé secrète est critique pour la signature cryptographique. 
+# Elle doit rester secrète en production.
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-dev')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# ATTENTION : Ne jamais laisser DEBUG a True en production.
+# Cela pourrait exposer des informations sensibles sur votre configuration.
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.43.232,192.168.43.106,0.0.0.0,172.22.128.1').split(',')
@@ -36,7 +39,8 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# CSRF settings for production
+# CSRF (Cross-Site Request Forgery) : Domaines de confiance.
+# Autorise le frontend (localhost ou domaine de prod) à faire des requêtes sécurisées.
 CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
@@ -45,8 +49,10 @@ if RENDER_EXTERNAL_HOSTNAME:
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-# Application definition
-
+# Définition des Applications
+# Liste des modules installés.
+# - Apps tierces : daphne (serveur ASGI), cloudinary, rest_framework, etc.
+# - Nos apps : properties, chat, users, visits
 INSTALLED_APPS = [
     'daphne',
     
@@ -106,7 +112,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application' 
 
 
-# Database
+# Base de données
+# Utilisation de dj_database_url pour supporter PostgreSQL (production) et SQLite (dev)
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
@@ -153,6 +160,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 STATICFILES_DIRS = []
 
+# CORS (Cross-Origin Resource Sharing)
+# Liste des origines autorisées à faire des requêtes AJAX/Fetch vers cette API.
+# Indispensable pour que le Frontend (port 3000) puisse parler au Backend (port 8000).
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -186,8 +196,12 @@ CLOUDINARY_STORAGE = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Django Rest Framework (DRF)
+# Configuration globale de l'API.
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # On utilise JWT (JSON Web Token) pour l'authentification.
+        # Cela permet d'être "stateless" (pas de session stockée côté serveur).
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': [
@@ -198,8 +212,11 @@ REST_FRAMEWORK = {
 }
 
 from datetime import timedelta
+# Configuration Simple JWT
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # Pratique pour le dev
+    # Durée de vie du token d'accès (court terme)
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # Mis à 1 jour pour faciliter le dev/test
+    # Durée de vie du refresh token (long terme, permet de récupérer un nouveau access token)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
@@ -209,6 +226,8 @@ SIMPLE_JWT = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 3. Configuration de la couche Redis (Channel Layer)
+# Nécessaire pour les WebSockets (Chat en temps réel).
+# Utilise Redis comme backend de messagerie.
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379')
 
 CHANNEL_LAYERS = {
