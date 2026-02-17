@@ -9,22 +9,41 @@ class VisitShortSerializer(serializers.ModelSerializer):
         fields = ['id', 'proposed_date', 'status']
 
 class MessageSerializer(serializers.ModelSerializer):
+    """
+    Sérialiseur de message.
+    Inclut les données de la visite si présente (read_only).
+    """
     sender_name = serializers.ReadOnlyField(source='sender.username')
-    visit = VisitSerializer(read_only=True) # On embarque l'objet visite
+    visit = VisitSerializer(read_only=True) # On embarque l'objet visite s'il existe
 
     class Meta:
         model = Message
         fields = ['id', 'conversation', 'sender', 'sender_name', 'text', 'timestamp', 'is_read', 'visit']
 
 class ConversationSerializer(serializers.ModelSerializer):
+    """
+    Sérialiseur complet pour la liste des conversations.
+    Enrichit l'objet avec des champs calculés pour l'affichage Frontend :
+    - Infos du bien (Titre, Image)
+    - Infos de l'interlocuteur (Client ou Agent : Nom, Avatar)
+    - Dernier message (pour l'aperçu)
+    - Compteur de non-lus
+    """
     messages = MessageSerializer(many=True, read_only=True)
     property_title = serializers.ReadOnlyField(source='property.title')
     property_slug = serializers.ReadOnlyField(source='property.slug')
     property_image = serializers.SerializerMethodField()
+    # Informations Client
     client_username = serializers.ReadOnlyField(source='client.username')
+    client_first_name = serializers.ReadOnlyField(source='client.first_name')
+    client_last_name = serializers.ReadOnlyField(source='client.last_name')
     client_avatar = serializers.SerializerMethodField()
+    # Informations Agent
     agent_username = serializers.ReadOnlyField(source='agent.username')
+    agent_first_name = serializers.ReadOnlyField(source='agent.first_name')
+    agent_last_name = serializers.ReadOnlyField(source='agent.last_name')
     agent_avatar = serializers.SerializerMethodField()
+    # Metadonnées différées
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
     
@@ -32,8 +51,8 @@ class ConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = [
             'id', 'property', 'property_title', 'property_slug', 'property_image',
-            'client', 'client_username', 'client_avatar',
-            'agent', 'agent_username', 'agent_avatar',
+            'client', 'client_username', 'client_first_name', 'client_last_name', 'client_avatar',
+            'agent', 'agent_username', 'agent_first_name', 'agent_last_name', 'agent_avatar',
             'messages', 'last_message', 'unread_count', 'created_at', 'updated_at'
         ]
 
